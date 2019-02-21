@@ -6,7 +6,9 @@
 
 .docker.env
 docker/data/dbdata/*
+!docker/data/dbdata/.gitkeep
 docker/data/redis/*
+!docker/data/redis/.gitkeep
 public
 
 ##################################
