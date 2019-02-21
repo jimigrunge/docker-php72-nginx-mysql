@@ -1,0 +1,108 @@
+# https://www.digitalocean.com/community/tutorials/how-to-set-up-laravel-nginx-and-mysql-with-docker-compose
+version: '3'
+
+# Network
+networks:
+  app-network:
+    driver: bridge
+#Volumes
+volumes:
+  data:
+    driver: local
+
+services:
+
+  #PHP Service
+  jcg-app:
+    container_name: jcg-app
+    env_file: .docker.env
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    image: digitalocean.com/php
+    restart: unless-stopped
+    tty: true
+    environment:
+      SERVICE_NAME: app
+      SERVICE_TAGS: dev
+    working_dir: /var/www
+    ports:
+      - 9000:9000
+    volumes:
+      - ./:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - app-network
+
+  #Nginx Service
+  jcg-nginx:
+    container_name: jcg-nginx
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./public:/var/www/public
+      - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
+    depends_on:
+        - jcg-app
+        - jcg-db
+    networks:
+      - app-network
+
+  #MySQL Service
+  jcg-db:
+    container_name: jcg-db
+    env_file: .docker.env
+    image: mysql:5.7.22
+    restart: always
+    tty: true
+    ports:
+      - 3306:3306
+    depends_on:
+        - jcg-app
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    volumes:
+      - ./docker/data/dbdata/:/var/lib/mysql/
+      - ./docker/mysql/my.cnf:/etc/mysql/my.cnf
+    networks:
+      - app-network
+
+  # Redis server
+  jcg-redis:
+    container_name: jcg-redis
+    image: redis:4.0-alpine
+    ports:
+      - 6379:6379
+    volumes:
+      - "./docker/data/redis:/data"
+    command: redis-server --appendonly yes
+    networks:
+      - app-network
+
+  # Mail catch
+  jcg-mailhog:
+    container_name: jcg-mailhog
+    image: mailhog/mailhog:latest
+    ports:
+      - "8025:8025"
+    networks:
+      - app-network
+
+  # Search
+  jcg-elasticsearch:
+    container_name: jcg-elasticsearch
+    image: elasticsearch:6.5.4
+    networks:
+      - app-network
+

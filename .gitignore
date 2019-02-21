@@ -1,0 +1,44 @@
+##################################
+# Files and folders to ignore.
+# Things listed here will be
+#  ignored by version control.
+##################################
+
+.docker.env
+docker/data/dbdata/*
+docker/data/redis/*
+public
+
+##################################
+# IDE files
+##################################
+# Intellij(PhpStorm)
+.idea/
+*.iml
+*.iws
+# Netbeans
+nbproject/
+nbproject/*
+# Eclipse
+.classpath
+.project
+.settings/
+
+##################################
+# OS generated files
+##################################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.tmp
+*.bak
+*.swp
+*~.nib
+*~
+/variables.env
+/docs/api-parsing/*
+/build
