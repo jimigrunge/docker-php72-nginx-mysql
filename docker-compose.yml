@@ -105,3 +105,22 @@ services:
     networks:
       - app-network
 
+  # Node.js
+  node:
+    image: wodby/node:10-0.11.0
+    container_name: "jcg-node"
+    working_dir: /app
+    expose:
+      - "3000"
+    volumes:
+      - .:/app
+    command: sh -c 'npm install && npm run start'
+    depends_on:
+      - jcg-db
+    networks:
+      - app-network
+
+#  memcached:
+#    container_name: "jcg-memcached"
+#    image: wodby/memcached:1-2.2.1
+
